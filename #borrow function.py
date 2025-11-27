@@ -5,7 +5,7 @@ def borrow_movies():
     borrowings = load_csv(BORROW_FILE)
 
     user_id = input("User ID: ").strip()
-    if not any(str(u["id"]) == user_id for u in users):
+    if not any(str(u["User ID"]) == user_id for u in users):
         print("User not found.")
         return
 
