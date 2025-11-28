@@ -1,24 +1,24 @@
-import csv
-import os
-from datetime import datetime
+import csv # this code helps to load the users.csv and movies.csv files
+import os  # this help create directories in the operating system (to create new csv filess kind of like pandas interacts directly with the terminal)
+from datetime import datetime #
 
-USERS_FILE = "source_files/users.csv"
-MOVIES_FILE = "source_files/movies.csv"
-BORROW_FILE = "source_files/borrowings.csv"
+USERS_FILE = "source_files/users.csv" # directory inside files. the adress for .csv file for users
+MOVIES_FILE = "source_files/movies.csv"  # "                                           " for movies
+BORROW_FILE = "source_files/borrowings.csv" # calls to the creation of a new file with the borrowing history of the movies
 
 # ================================
-# CSV HELPERS
+# CSV HELPERS                       # changed the file names for the functions have to change the 
 # ================================
 
-def load_csv(filename):
-    if not os.path.exists(filename):
+def load_csv(USERS_FILE): 
+    if not os.path.exists(source_files/users.csv):
         return []
-    with open(filename, newline="", encoding="utf-8") as file:
+    with open(USERS_FILE, newline="", encoding="utf-8") as file: # newline is specifically for windows  , utf - ensures special characters work 
         reader = csv.DictReader(file)
         return list(reader)
 
-def save_csv(filename, data, fieldnames):
-    with open(filename, "w", newline="", encoding="utf-8") as file:
+def save_csv(users.csv, data, User ID, User Name):
+    with open(users.csv, "w", newline="", encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(data)
@@ -31,6 +31,10 @@ def generate_new_id(records):
 # ================================
 # USER MANAGEMENT
 # ================================
+
+# --------------- First load the csv file and create new id then replace file name with the names of the files--------
+
+#
 
 def add_user():
     users = load_csv(USERS_FILE)
@@ -45,6 +49,8 @@ def add_user():
 
     print(f"User added with ID: {user_id}")
 
+    #  ------------------------------------------
+
 def view_users():
     users = load_csv(USERS_FILE)
     if not users:
@@ -53,7 +59,7 @@ def view_users():
 
     print("\n--- USERS ---")
     for u in users:
-        print(f"{u['id']}: {u['name']}")
+        print(f"{u['user_id']}: {u['user_name']}")
     print("-------------")
 
 # ================================
