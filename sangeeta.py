@@ -11,13 +11,13 @@ BORROW_FILE = "source_files/borrowings.csv" # calls to the creation of a new fil
 # ================================
 
 def load_csv(USERS_FILE): 
-    if not os.path.exists(source_files/users.csv):
+    if not os.path.exists("source_files/users.csv"):
         return []
     with open(USERS_FILE, newline="", encoding="utf-8") as file: # newline is specifically for windows  , utf - ensures special characters work 
         reader = csv.DictReader(file)
         return list(reader)
 
-def save_csv(users.csv, data, User ID, User Name):
+def save_csv(USERS_FILE, data, user_id, user_name):
     with open(users.csv, "w", newline="", encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
