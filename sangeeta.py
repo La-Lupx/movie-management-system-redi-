@@ -32,13 +32,12 @@ def generate_new_id(records):
 # USER MANAGEMENT
 # ================================
 
-# --------------- First load the csv file and create new id then replace file name with the names of the files--------
+# --------------- First load the .csv file and create new id then replace file name with the names of the files--------
 
-#
 
 def add_user():
     users = load_csv(USERS_FILE)
-    name = input("Enter user name: ").strip()
+    name = input("Enter user name: ").strip() # removes spaces 
     if not name:
         print("Name cannot be empty.")
         return
@@ -49,7 +48,7 @@ def add_user():
 
     print(f"User added with ID: {user_id}")
 
-    #  ------------------------------------------
+    #  -------------- this part is for printing the users and also the error management system ---- 
 
 def view_users():
     users = load_csv(USERS_FILE)
@@ -57,10 +56,10 @@ def view_users():
         print("No users found.")
         return
 
-    print("\n--- USERS ---")
+    print("\n---☻☺☻☺☻☺ THESE ARE OUR CURRENT USERS  ☺☻☺☻☺☻ ---") # Header for the information don bellow  /n iss ssignaling the program for a new line in the printed information
     for u in users:
         print(f"{u['user_id']}: {u['user_name']}")
-    print("-------------")
+    print("-----••••••-----")  #
 
 # ================================
 # MOVIE MANAGEMENT
