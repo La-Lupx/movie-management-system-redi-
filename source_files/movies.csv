@@ -1,4 +1,4 @@
-Movie ID,Title,Director,Year,Available Copies
+movie_id,title,director,year,available_copies
 101,Inception,Christopher Nolan,2010,3
 102,The Matrix,Wachowskis,1999,5
 103,Interstellar,Christopher Nolan,2014,2

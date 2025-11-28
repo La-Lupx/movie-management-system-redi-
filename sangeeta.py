@@ -2,22 +2,26 @@ import csv # this code helps to load the users.csv and movies.csv files
 import os  # this help create directories in the operating system (to create new csv filess kind of like pandas interacts directly with the terminal)
 from datetime import datetime #
 
-USERS_FILE = "source_files/users.csv" # directory inside files. the adress for .csv file for users
+users_file = "source_files/users.csv" # directory inside files. the adress for .csv file for users
 MOVIES_FILE = "source_files/movies.csv"  # "                                           " for movies
 BORROW_FILE = "source_files/borrowings.csv" # calls to the creation of a new file with the borrowing history of the movies
-
+# FIELDNAMES 
+# ================================
+user_fieldnames = ["user_id", "user_name"]
+movie_fieldnames = ["movie_id", "movie_title", "genre"]      # example
+borrow_fieldnames = ["user_id", "movie_id", "date"] 
 # ================================
 # CSV HELPERS                       # changed the file names for the functions have to change the 
 # ================================
 
-def load_csv(USERS_FILE): 
+def load_csv(users_file): #USERS_FILE is changed to the users_file
     if not os.path.exists("source_files/users.csv"):
         return []
-    with open(USERS_FILE, newline="", encoding="utf-8") as file: # newline is specifically for windows  , utf - ensures special characters work 
+    with open(users_file, newline="", encoding="utf-8") as file: # newline is specifically for windows  , utf - ensures special characters work 
         reader = csv.DictReader(file)
         return list(reader)
 
-def save_csv(USERS_FILE, data, user_id, user_name):
+def save_csv(users_file, data, user_id, user_name):
     with open(users.csv, "w", newline="", encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
@@ -36,7 +40,7 @@ def generate_new_id(records):
 
 
 def add_user():
-    users = load_csv(USERS_FILE)
+    users = load_csv(users_file)
     name = input("Enter user name: ").strip() # removes spaces 
     if not name:
         print("Name cannot be empty.")
@@ -44,14 +48,14 @@ def add_user():
 
     user_id = generate_new_id(users)
     users.append({"id": user_id, "name": name})
-    save_csv(USERS_FILE, users, ["id", "name"])
+    save_csv(users_file, users, ["id", "name"])
 
     print(f"User added with ID: {user_id}")
 
     #  -------------- this part is for printing the users and also the error management system ---- 
 
 def view_users():
-    users = load_csv(USERS_FILE)
+    users = load_csv(users_file)
     if not users:
         print("No users found.")
         return
@@ -105,7 +109,7 @@ def view_movies():
 # ================================
 
 def borrow_movies():
-    users = load_csv(USERS_FILE)
+    users = load_csv(users_file)
     movies = load_csv(MOVIES_FILE)
     borrowings = load_csv(BORROW_FILE)
 
