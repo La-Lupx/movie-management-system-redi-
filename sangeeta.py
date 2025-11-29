@@ -3,12 +3,12 @@ import os  # this help create directories in the operating system (to create new
 from datetime import datetime #
 
 users_file = "source_files/users.csv" # directory inside files. the adress for .csv file for users
-MOVIES_FILE = "source_files/movies.csv"  # "                                           " for movies
+movies_file = "source_files/movies.csv"  #"                                           " for movies
 BORROW_FILE = "source_files/borrowings.csv" # calls to the creation of a new file with the borrowing history of the movies
 # FIELDNAMES 
 # ================================
 user_fieldnames = ["user_id", "user_name"]
-movie_fieldnames = ["movie_id", "movie_title", "genre"]      # example
+movie_fieldnames = ["movie_id", "movie_title", "year","available_copies"]      
 borrow_fieldnames = ["user_id", "movie_id", "date"] 
 # ================================
 # CSV HELPERS                       # changed the file names for the functions have to change the 
@@ -69,38 +69,38 @@ def view_users():
 # ================================
 
 def add_movie():
-    movies = load_csv(MOVIES_FILE)
+    movies = load_csv(movies_file)
 
     title = input("Enter movie title: ").strip()
     director = input("Enter director: ").strip()
     year = input("Enter release year: ").strip()
     copies = input("Enter number of copies: ").strip()
 
-    if not title or not director or not year or not copies.isdigit():
+    if not title or not director or not year.isdigit() or not copies.isdigit():
         print("Invalid input.")
         return
 
-    movie_id = generate_new_id(movies)
+    movie_id = generate_new_id(movies,"movie_id") #generating new movie id
     movies.append({
-        "id": movie_id,
+        "movie_id": str(movie_id),
         "title": title,
         "director": director,
         "year": year,
-        "copies": copies
+        "available_copies": copies
     })
 
-    save_csv(MOVIES_FILE, movies, ["id", "title", "director", "year", "copies"])
+    save_csv(movies_file, movies, movie_fieldnames)
     print(f"Movie added with ID: {movie_id}")
 
 def view_movies():
-    movies = load_csv(MOVIES_FILE)
+    movies = load_csv(movies_file)
     if not movies:
         print("No movies found.")
         return
 
-    print("\n--- MOVIES ---")
+    print("\n--- movies ---")
     for m in movies:
-        print(f"{m['id']} | {m['title']} | {m['director']} | {m['year']} | Copies: {m['copies']}")
+        print(f"{m['movie_id']} | {m['title']} | {m['director']} | {m['year']} | Copies: {m['available_copies']}")
     print("--------------")
 
 # ================================
