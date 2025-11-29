@@ -197,25 +197,30 @@ def return_movies():
 # ================================
 
 def list_borrowed_movies():
-    movies = load_csv(MOVIES_FILE)
-    movies_dict = {str(m['id']): m for m in movies}
-    borrowings = load_csv(BORROW_FILE)
+    movies = load_csv(movies_file)
+    movies_dict = {str(m['movie_id']): m for m in movies}
+    borrowings = load_csv(borrow_file)
 
     user_id = input("User ID: ").strip()
-    record = next((b for b in borrowings if b["user_id"] == user_id), None)
-    if not record or not record.get("movie_ids", "").strip():
+    user_records =[
+        b for b in borrowings
+        if b["user_id"] == user_id and b["return_date"]==""
+    ]
+    if not user_records:
         print("No borrowings found for this user.")
         return
-
-    borrowed_ids = [mid for mid in record["movie_ids"].split(",") if mid.strip()]
+        
     print("\n--- Borrowed Movies ---")
-    print("Borrowing Date:", record.get("date", "N/A"))
-    for mid in borrowed_ids:
+    
+    for rec in user_records:
+        mid = rec["movie_id"]
         movie = movies_dict.get(mid)
-        if movie:
-            print(f"{mid}: {movie['title']}")
-        else:
-            print(f"{mid}: [Movie not found]")
+
+        title = movie["title"] if movie else "[Movie not found]"
+        date = rec.get("borrow_date", "N/A")
+
+        print(f"Movie ID: {mid} | Title: {title} | Borrowed on: {date}")
+        
     print("-----------------------")
 
 # ================================
