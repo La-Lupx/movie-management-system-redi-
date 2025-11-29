@@ -15,22 +15,22 @@ borrow_fieldnames = ["user_id", "movie_id", "date"]
 # ================================
 
 def load_csv(users_file): #USERS_FILE is changed to the users_file
-    if not os.path.exists("source_files/users.csv"):
+    if not os.path.exists(users_file):
         return []
     with open(users_file, newline="", encoding="utf-8") as file: # newline is specifically for windows  , utf - ensures special characters work 
         reader = csv.DictReader(file)
         return list(reader)
 
-def save_csv(users_file, data, user_id, user_name):
-    with open(users.csv, "w", newline="", encoding="utf-8") as file:
+def save_csv(users_file, data, fieldnames):
+    with open(users_file, "w", newline="", encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(data)
 
-def generate_new_id(records):
+def generate_new_id(records,id_field):
     if not records:
         return 1
-    return max(int(r["id"]) for r in records) + 1
+    return max(int(r[id_field]) for r in records) + 1
 
 # ================================
 # USER MANAGEMENT
@@ -46,10 +46,9 @@ def add_user():
         print("Name cannot be empty.")
         return
 
-    user_id = generate_new_id(users)
-    users.append({"id": user_id, "name": name})
-    save_csv(users_file, users, ["id", "name"])
-
+    user_id = generate_new_id(users,"user_id")
+    users.append({"user_id":str(user_id), "user_name":name})
+    save_csv(users_file, users, ["user_id", "user_name"])
     print(f"User added with ID: {user_id}")
 
     #  -------------- this part is for printing the users and also the error management system ---- 
