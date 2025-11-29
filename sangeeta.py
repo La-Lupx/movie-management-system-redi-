@@ -8,7 +8,7 @@ BORROW_FILE = "source_files/borrowings.csv" # calls to the creation of a new fil
 # FIELDNAMES 
 # ================================
 user_fieldnames = ["user_id", "user_name"]
-movie_fieldnames = ["movie_id", "movie_title", "year","available_copies"]      
+movie_fieldnames = ["movie_id", "title","director","year","available_copies"]      
 borrow_fieldnames = ["user_id", "movie_id", "date"] 
 # ================================
 # CSV HELPERS                       # changed the file names for the functions have to change the 
