@@ -156,39 +156,40 @@ def borrow_movies():
 # ================================
 
 def return_movies():
-    movies = load_csv(MOVIES_FILE)
-    movies_dict = {str(m["id"]): m for m in movies}
-    borrowings = load_csv(BORROW_FILE)
+    movies = load_csv(movies_file)
+    movies_dict = {str(m["movie_id"]): m for m in movies}
+    borrowings = load_csv(borrow_file)
 
     user_id = input("User ID: ").strip()
-    record = next((b for b in borrowings if b["user_id"] == user_id), None)
-    if not record:
+    user_records = [b for b in borrowings
+                    if b["user_id"] == user_id and b["return_date"]==""]
+    if not user_records:
         print("User has no borrowings.")
         return
 
-    to_return = [mid.strip() for mid in input("Enter Movie IDs to return: ").split(",") if mid.strip()]
-    borrowed = set(record["movie_ids"].split(",")) if record["movie_ids"].strip() else set()
-    actually_returned = []
+    print("\nMovies the user currently has:")
+    for r in user_records:
+        print(f"- Movie ID {r['movie_id']} (Borrowed on {r['borrow_date']})")
 
-    for mid in to_return:
-        if mid in borrowed:
-            if mid in movies_dict:
-                movies_dict[mid]["copies"] = str(int(movies_dict[mid]["copies"]) + 1)
-            borrowed.remove(mid)
-            actually_returned.append(mid)
+    return_ids = [mid.strip() for mid in input("Enter Movie IDs to return: ").split(",") if mid.strip()] #movie_ids which are to return
 
-    if not actually_returned:
-        print("No valid movies returned.")
-        return
+    today = datetime.now().strftime("%Y-%m-%d")
+    returned_any = False
+    for mid in return_ids:
+         record = next((b for b in user_records
+                        if b["movie_id"] == mid and b["return_date"] == ""), None) #borrowing record
+        if record:
+            record["return_date"] = today #returned copies 
+            if mid in movies_dict: #increasing available_copies
+                movies_dict[mid]["available_copies"] = str(
+                    int(movies_dict[mid]["available_copies"]) + 1)
+                returned_any=True
+    if not returned_any:
+       print("there is no valid movie ids to return")
+       return
 
-    if borrowed:
-        record["movie_ids"] = ",".join(borrowed)
-    else:
-        borrowings = [b for b in borrowings if b["user_id"] != user_id]
-
-    save_csv(MOVIES_FILE, list(movies_dict.values()), ["id", "title", "director", "year", "copies"])
-    borrowings = [b for b in borrowings if b.get("movie_ids", "").strip()]
-    save_csv(BORROW_FILE, borrowings, ["user_id", "movie_ids", "date"])
+    save_csv(movies_file, list(movies_dict.values()), movie_fieldnames)
+    save_csv(borrow_file, borrowings, borrow_fieldnames)
     print("Movies returned successfully!")
 
 # ================================
