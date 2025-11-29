@@ -175,15 +175,17 @@ def return_movies():
 
     today = datetime.now().strftime("%Y-%m-%d")
     returned_any = False
+    
     for mid in return_ids:
-         record = next((b for b in user_records
+        record = next((b for b in user_records
                         if b["movie_id"] == mid and b["return_date"] == ""), None) #borrowing record
         if record:
             record["return_date"] = today #returned copies 
             if mid in movies_dict: #increasing available_copies
                 movies_dict[mid]["available_copies"] = str(
-                    int(movies_dict[mid]["available_copies"]) + 1)
-                returned_any=True
+                    int(movies_dict[mid]["available_copies"]) + 1
+                )
+            returned_any=True
     if not returned_any:
        print("there is no valid movie ids to return")
        return
