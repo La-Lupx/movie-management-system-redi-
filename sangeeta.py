@@ -1,8 +1,4 @@
 import os
-print("Current working directory:", os.getcwd())
-print("Looking for users.csv at:", users_file)
-print("Looking for movies.csv at:", movies_file)
-print("Looking for borrowings.csv at:", borrow_file)
 import csv # this code helps to load the users.csv and movies.csv files
 import os  # this help create directories in the operating system (to create new csv filess kind of like pandas interacts directly with the terminal)
 os.makedirs("source_files", exist_ok=True)
