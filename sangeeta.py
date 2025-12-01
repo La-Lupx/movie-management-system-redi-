@@ -1,5 +1,11 @@
+import os
+print("Current working directory:", os.getcwd())
+print("Looking for users.csv at:", users_file)
+print("Looking for movies.csv at:", movies_file)
+print("Looking for borrowings.csv at:", borrow_file)
 import csv # this code helps to load the users.csv and movies.csv files
 import os  # this help create directories in the operating system (to create new csv filess kind of like pandas interacts directly with the terminal)
+os.makedirs("source_files", exist_ok=True)
 from datetime import datetime #
 
 users_file = "source_files/users.csv" # directory inside files. the adress for .csv file for users
@@ -19,7 +25,8 @@ def load_csv(users_file): #USERS_FILE is changed to the users_file
         return []
     with open(users_file, newline="", encoding="utf-8") as file: # newline is specifically for windows  , utf - ensures special characters work 
         reader = csv.DictReader(file)
-        return list(reader)
+        return [{k: v.strip() if isinstance(v, str) else v for k, v in row.items()} for row in reader] # strip whitespace from all fields
+        
 
 def save_csv(users_file, data, fieldnames):
     with open(users_file, "w", newline="", encoding="utf-8") as file:
@@ -106,22 +113,21 @@ def view_movies():
 # ================================
 # BORROWING MOVIES
 # ================================
-
 def borrow_movies():
     users = load_csv(users_file)
     movies = load_csv(movies_file)
     borrowings = load_csv(borrow_file)
 
-    user_id = input("User ID: ").strip()
+    user_id = input("user id:").strip()
     if not any(u["user_id"]== user_id for u in users):
         print("User not found.")
         return
 
-    movie_ids = [mid.strip() for mid in input("Enter Movie IDs (comma separated): ").split(",") if mid.strip()]
-    movies_dict = {str(m["movie_id"]): m for m in movies}
+    movie_id = [mid.strip() for mid in input("Enter movie_id:").split(",") if mid.strip()]
+    movies_dict = {m["movie_id"].strip(): m for m in movies}
     
     unavailable = []
-    for mid in movie_ids:
+    for mid in movie_id:
         movie = movies_dict.get(mid)
         if not movie:
             unavailable.append(f"{mid} (not found)")
@@ -136,7 +142,7 @@ def borrow_movies():
         return
     # Deduct copies and create borrow records
     today = datetime.now().strftime("%Y-%m-%d")
-    for mid in movie_ids:
+    for mid in movie_id:
         movies_dict[mid]["available_copies"] = str(int(movies_dict[mid]["available_copies"]) - 1) # Deduct available copies
     
     # Add a new row in borrow CSV
@@ -146,18 +152,19 @@ def borrow_movies():
              "borrow_date": today,
              "return_date": "" # empty until returned
     }) 
-  
-    save_csv(movies_file, list(movies_dict.values()), movie_fieldnames)
+    updated_movies = []
+    for m in movies:
+        updated_movies.append(movies_dict[m["movie_id"].strip()])
+
+    save_csv(movies_file, updated_movies, movie_fieldnames)
     save_csv(borrow_file, borrowings, borrow_fieldnames)
     print("Movies borrowed successfully!")
-
-# ================================
 # RETURN MOVIES
 # ================================
 
 def return_movies():
     movies = load_csv(movies_file)
-    movies_dict = {str(m["movie_id"]): m for m in movies}
+    movies_dict = {m["movie_id"].strip(): m for m in movies}
     borrowings = load_csv(borrow_file)
 
     user_id = input("User ID: ").strip()
@@ -189,18 +196,20 @@ def return_movies():
     if not returned_any:
        print("there is no valid movie ids to return")
        return
+    updated_movies = []
+    for m in movies:
+        updated_movies.append(movies_dict[m["movie_id"].strip()])
 
-    save_csv(movies_file, list(movies_dict.values()), movie_fieldnames)
+    save_csv(movies_file, updated_movies, movie_fieldnames)
     save_csv(borrow_file, borrowings, borrow_fieldnames)
     print("Movies returned successfully!")
-
 # ================================
 # LIST BORROWED MOVIES
 # ================================
 
 def list_borrowed_movies():
     movies = load_csv(movies_file)
-    movies_dict = {str(m['movie_id']): m for m in movies}
+    movies_dict = {m['movie_id'].strip(): m for m in movies}
     borrowings = load_csv(borrow_file)
 
     user_id = input("User ID: ").strip()
@@ -224,6 +233,8 @@ def list_borrowed_movies():
         print(f"Movie ID: {mid} | Title: {title} | Borrowed on: {date}")
         
     print("-----------------------")
+print("Users CSV content:", load_csv(users_file))
+print("Movies CSV content:", load_csv(movies_file))
 
 # ================================
 # MENU
@@ -263,5 +274,4 @@ def main_menu():
             print("Invalid option.")
 
 if __name__ == "__main__":
-    main_menu()
-
+  main_menu()
