@@ -229,8 +229,6 @@ def list_borrowed_movies():
         print(f"Movie ID: {mid} | Title: {title} | Borrowed on: {date}")
         
     print("-----------------------")
-print("Users CSV content:", load_csv(users_file))
-print("Movies CSV content:", load_csv(movies_file))
 
 # ================================
 # MENU
