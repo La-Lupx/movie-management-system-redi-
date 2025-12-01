@@ -165,7 +165,8 @@ def return_movies():
 
     user_id = input("User ID: ").strip()
     user_records = [b for b in borrowings
-                    if b["user_id"] == user_id and b["return_date"]==""]
+                    if b.get("user_id","").strip()== user_id and b.get("return_date").strip()==""
+    ]
     if not user_records:
         print("User has no borrowings.")
         return
@@ -211,7 +212,7 @@ def list_borrowed_movies():
     user_id = input("User ID: ").strip()
     user_records =[
         b for b in borrowings
-        if b["user_id"] == user_id and b["return_date"]==""
+        if b["user_id"] == user_id and b["return_date"]== ""
     ]
     if not user_records:
         print("No borrowings found for this user.")
@@ -269,3 +270,4 @@ def main_menu():
 
 if __name__ == "__main__":
   main_menu()
+
