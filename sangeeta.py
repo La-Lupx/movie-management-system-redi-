@@ -7,11 +7,13 @@ from datetime import datetime #
 users_file = "source_files/users.csv" # directory inside files. the adress for .csv file for users
 movies_file = "source_files/movies.csv"  #"                                           " for movies
 borrow_file = "source_files/borrowings.csv" # calls to the creation of a new file with the borrowing history of the movies
+return_file= "source_files/returns.csv"
 # FIELDNAMES 
 # ================================
 user_fieldnames = ["user_id", "user_name"]
 movie_fieldnames = ["movie_id", "title","director","year","available_copies"]      
 borrow_fieldnames = ["user_id", "movie_id", "borrow_date","return_date"] 
+return_fieldnames=["user_id", "movie_id","return_date']
 # ================================
 # CSV HELPERS                       # changed the file names for the functions have to change the 
 # ================================
@@ -62,7 +64,7 @@ def view_users():
         print("No users found.")
         return
 
-    print("\n---☻☺☻☺☻☺ THESE ARE OUR CURRENT USERS  ☺☻☺☻☺☻ ---") # Header for the information don bellow  /n iss ssignaling the program for a new line in the printed information
+    print("\n---☻☺☻☺☻☺ THESE ARE OUR CURRENT USERS  ☺☻☺☻☺☻ ---") # Header for the information don bellow  /n is signaling the program for a new line in the printed information
     for u in users:
         print(f"{u['user_id']}: {u['user_name']}")
     print("-----••••••-----")  #
@@ -160,10 +162,11 @@ def return_movies():
     movies = load_csv(movies_file)
     movies_dict = {m["movie_id"].strip(): m for m in movies}
     borrowings = load_csv(borrow_file)
+    returns=load_csv(return_file)
 
     user_id = input("User ID: ").strip()
-    user_records = [b for b in borrowings
-                    if b.get("user_id","").strip()== user_id and b.get("return_date").strip()==""
+    user_records = [b for b in borrowings #only checks active borrowings
+                    if b.get("user_id","").strip()== user_id
     ]
     if not user_records:
         print("User has no borrowings.")
@@ -183,12 +186,17 @@ def return_movies():
     for mid in return_ids:
         record = next((b for b in user_records
                         if b["movie_id"] == mid and b["return_date"] == ""), None) #borrowing record
-        if record:
-            record["return_date"] = today #returned copies 
+    if record
+        returns.append({ #add to return.csv file
+        "user_id": user_id,
+        "movie_id": mid,
+        "return_date": today
+    })
             if mid in movies_dict: #increasing available_copies
                 movies_dict[mid]["available_copies"] = str(
                     int(movies_dict[mid]["available_copies"]) + 1
                 )
+            borrowings = [b for b in borrowings if not (b["user_id"] == user_id and b["movie_id"] == mid)]
             returned_any=True
         else:
             print(f"Error: Movie ID '{mid}' is not borrowed by this user or already returned.")#error message if users tries to return invalid movies
@@ -201,6 +209,7 @@ def return_movies():
 
     save_csv(movies_file, updated_movies, movie_fieldnames)
     save_csv(borrow_file, borrowings, borrow_fieldnames)
+    save_csv(return_file, returns, return_fieldnames)
     print("Movies returned successfully!")
 # ================================
 # LIST BORROWED MOVIES
