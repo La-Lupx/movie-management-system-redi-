@@ -7,13 +7,11 @@ from datetime import datetime #
 users_file = "source_files/users.csv" # directory inside files. the adress for .csv file for users
 movies_file = "source_files/movies.csv"  #"                                           " for movies
 borrow_file = "source_files/borrowings.csv" # calls to the creation of a new file with the borrowing history of the movies
-return_file= "source_files/returns.csv"
 # FIELDNAMES 
 # ================================
 user_fieldnames = ["user_id", "user_name"]
 movie_fieldnames = ["movie_id", "title","director","year","available_copies"]      
 borrow_fieldnames = ["user_id", "movie_id", "borrow_date","return_date"] 
-return_fieldnames = ["user_id", "movie_id","return_date"] 
 # ================================
 # CSV HELPERS                       # changed the file names for the functions have to change the 
 # ================================
@@ -36,11 +34,6 @@ def generate_new_id(records,id_field):
     if not records:
         return 1
     return max(int(r[id_field]) for r in records) + 1
-
-if not os.path.exists(return_file):
-    with open(return_file, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=return_fieldnames)
-        writer.writeheader()
 
 # ================================
 # USER MANAGEMENT
@@ -123,7 +116,7 @@ def borrow_movies():
 
     user_id = input("user id:").strip()
     if not any(u["user_id"]== user_id for u in users):
-        print(f"Error: User ID '{user_id}' not found.")#user id validation(error handling)
+        print("User not found.")
         return
 
     movie_id = [mid.strip() for mid in input("Enter movie_id:").split(",") if mid.strip()]
@@ -133,21 +126,23 @@ def borrow_movies():
     for mid in movie_id:
         movie = movies_dict.get(mid)
         if not movie:
-            unavailable.append(f"{mid} (Movie Id not found)") #descriptive error message
+            unavailable.append(f"{mid} (not found)")
         elif int(movie["available_copies"]) <= 0:
-            unavailable.append(f"{mid} ({movie['title']} - no available copies)")#error handling
+            unavailable.append(f"{mid} ({movie['title']} - no copies)")
 
     if unavailable:
-        print("\nNot able to borrow the following movies:")#checking the available copies and movie existence
+        print("\nUnavailable:")
         for u in unavailable:
             print(" -", u)
         print("No movies have been borrowed.")
         return
-    today = datetime.now().strftime("%Y-%m-%d")# Deduct copies and create borrow records
+    # Deduct copies and create borrow records
+    today = datetime.now().strftime("%Y-%m-%d")
     for mid in movie_id:
         movies_dict[mid]["available_copies"] = str(int(movies_dict[mid]["available_copies"]) - 1) # Deduct available copies
     
-        borrowings.append({# Add a new row in borrow CSV
+    # Add a new row in borrow CSV
+        borrowings.append({
             "user_id": user_id,
              "movie_id": mid,
              "borrow_date": today,
@@ -166,13 +161,11 @@ def borrow_movies():
 def return_movies():
     movies = load_csv(movies_file)
     movies_dict = {m["movie_id"].strip(): m for m in movies}
-    borrowings =load_csv(borrow_file)
-    returns= load_csv(return_file)
+    borrowings = load_csv(borrow_file)
 
     user_id = input("User ID: ").strip()
-    user_records = [b for b in borrowings #checking the active borrowings
-                    if b.get("user_id","").strip()== user_id 
-    ]
+    user_records = [b for b in borrowings
+                    if b["user_id"] == user_id and b["return_date"]==""]
     if not user_records:
         print("User has no borrowings.")
         return
@@ -182,43 +175,29 @@ def return_movies():
         print(f"- Movie ID {r['movie_id']} (Borrowed on {r['borrow_date']})")
 
     return_ids = [mid.strip() for mid in input("Enter Movie IDs to return: ").split(",") if mid.strip()] #movie_ids which are to return
-    if not return_ids:
-        print("Error: No movie IDs entered.")#to check empty user ids
-        return
-    
+
     today = datetime.now().strftime("%Y-%m-%d")
     returned_any = False
     
     for mid in return_ids:
         record = next((b for b in user_records
-                        if b["movie_id"].strip() == mid), None) #borrowing record
+                        if b["movie_id"] == mid and b["return_date"] == ""), None) #borrowing record
         if record:
-            returns.append({ #add t the return.csv file
-                "user_id": user_id,
-                "movie_id": mid,
-                "return_date": today
-        })
+            record["return_date"] = today #returned copies 
             if mid in movies_dict: #increasing available_copies
                 movies_dict[mid]["available_copies"] = str(
                     int(movies_dict[mid]["available_copies"]) + 1
                 )
-        borrowings = [ #removing from borrowing.csv file
-                b for b in borrowings
-                if not (b["user_id"].strip()== user_id and b["movie_id"].strip() == mid)
-        ]
-        returned_any=True
-
-    else:
-        print(f"Error: Movie ID '{mid}' is not borrowed by this user or already returned.")#error message if users tries to return invalid movies
+            returned_any=True
     if not returned_any:
        print("there is no valid movie ids to return")
        return
-       
-    updated_movies = [movies_dict[m["movie_id"].strip()] for m in movies] #saving the updated files
+    updated_movies = []
+    for m in movies:
+        updated_movies.append(movies_dict[m["movie_id"].strip()])
 
     save_csv(movies_file, updated_movies, movie_fieldnames)
     save_csv(borrow_file, borrowings, borrow_fieldnames)
-    save_csv(return_file, returns, return_fieldnames)
     print("Movies returned successfully!")
 # ================================
 # LIST BORROWED MOVIES
@@ -230,13 +209,13 @@ def list_borrowed_movies():
     borrowings = load_csv(borrow_file)
 
     user_id = input("User ID: ").strip()
-    user_records = [
-        b for b in borrowings 
-        if b.get("user_id","").strip()== user_id and b.get("return_date","")== ""
+    user_records =[
+        b for b in borrowings
+        if b["user_id"] == user_id and b["return_date"]==""
     ]
-    if not user_records:##Handling of non-existing or invalid users id
-        print(f"No borrowings found for this User Id'{user_id}'") 
-        return 
+    if not user_records:
+        print("No borrowings found for this user.")
+        return
         
     print("\n--- Borrowed Movies ---")
     
@@ -250,6 +229,8 @@ def list_borrowed_movies():
         print(f"Movie ID: {mid} | Title: {title} | Borrowed on: {date}")
         
     print("-----------------------")
+print("Users CSV content:", load_csv(users_file))
+print("Movies CSV content:", load_csv(movies_file))
 
 # ================================
 # MENU
@@ -290,8 +271,3 @@ def main_menu():
 
 if __name__ == "__main__":
   main_menu()
-
-        
-
-        
-
